@@ -177,47 +177,40 @@ bool Filter::containsDomain(const char *domain, bool anti) const {
 }
 
 uint32_t Filter::getDomainCount(bool anti) {
-  if (!domainList || domainList[0] == '\0') {
-    return 0;
-  }
-
-  if (!anti && domainCount) {
-    return domainCount;
-  } else if (anti && antiDomainCount) {
-    return antiDomainCount;
-  }
-
-  int count = 0;
-  int startOffset = 0;
-  int len = 0;
-  const char *p = domainList;
-  while (*p != '\0') {
-    if (*p == '|') {
-      if (*(domainList + startOffset) == '~' && anti) {
-        count++;
-      } else if (*(domainList + startOffset) != '~' && !anti) {
-        count++;
-      }
-      startOffset = len + 1;
-      len = -1;
+    if (!domainList || domainList[0] == '\0') {
+        return 0;
     }
-    p++;
-    len++;
-  }
-
-  if (*(domainList + startOffset) == '~' && anti) {
-    count++;
-  } else if (*(domainList + startOffset) != '~' && !anti) {
-    count++;
-  }
-
-  if (anti) {
-    antiDomainCount = count;
-  } else {
-    domainCount = count;
-  }
-  return count;
+    
+    if (!anti && domainCount) {
+        return domainCount;
+    } else if (anti && antiDomainCount) {
+        return antiDomainCount;
+    }
+    char *p = domainList;
+    char *domainListArr =strtok(p, "|");
+    int count = 0;
+    while(domainListArr)
+    {
+//        printf("%s\n",domainListArr);
+//        printf("%c\n",*domainListArr);
+        
+        if (*domainListArr == '~' && anti) {
+            count++;
+        } else if (*domainListArr != '~' && !anti) {
+            count++;
+        }
+        domainListArr=strtok(NULL,"|");
+    }
+    
+    
+    if (anti) {
+        antiDomainCount = count;
+    } else {
+        domainCount = count;
+    }
+    return count;
 }
+
 
 void Filter::parseOption(const char *input, int len) {
   FilterOption *pFilterOption = &filterOption;
